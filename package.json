@@ -1,0 +1,12 @@
+{
+    "name": "azure-webapp",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.113.0",
+        "@pulumi/azure-native": "^v3.5.1"
+    }
+}

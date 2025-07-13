@@ -1,0 +1,30 @@
+import * as network from '@pulumi/azure-native/network'
+
+import { projectName, env, resourceGroup, location, tags } from './commons'
+
+// DDOS Protection IP-Level
+const ddosProtectionPlanName = `ddos-plan-name-${env}`
+const ddosProtectionPlan = new network.DdosProtectionPlan(ddosProtectionPlanName, {
+    resourceGroupName: resourceGroup.name,
+    location: location,
+    ddosProtectionPlanName: ddosProtectionPlanName,
+    tags: tags,
+})
+
+const publicIAddressName = `pip-${projectName}-${env}`
+export const appGwPublicIP = new network.PublicIPAddress(publicIAddressName, {
+    resourceGroupName: resourceGroup.name,
+    publicIpAddressName: publicIAddressName,
+    location: location,
+    publicIPAllocationMethod: 'Static', //Static or Dynamic => Static est obloigatoire pour la DDos protection, loadbalancer
+    sku: {
+        name: "Standard",
+        tier: "Regional" //Regional or Glabal => Only Regional is compatible with DDOS protection
+    },
+    ddosSettings: {
+        ddosProtectionPlan: {
+            id: ddosProtectionPlan.id
+        },
+        protectionMode: "Enabled",
+    }
+})
