@@ -2,6 +2,8 @@ import * as network from '@pulumi/azure-native/network'
 
 import { projectName, env, resourceGroup, location, tags } from './commons'
 
+export const dnsAppGwName = env == "prod" ? `agw-${projectName}-allodoctor` : `agw-${projectName}-${env}-allodoctor`
+
 // DDOS Protection IP-Level
 const ddosProtectionPlanName = `ddos-plan-name-${env}`
 const ddosProtectionPlan = new network.DdosProtectionPlan(ddosProtectionPlanName, {
@@ -11,20 +13,26 @@ const ddosProtectionPlan = new network.DdosProtectionPlan(ddosProtectionPlanName
     tags: tags,
 })
 
-const publicIAddressName = `pip-${projectName}-${env}`
+const publicIAddressName = `pip-agw-${projectName}-${env}`
 export const appGwPublicIP = new network.PublicIPAddress(publicIAddressName, {
     resourceGroupName: resourceGroup.name,
     publicIpAddressName: publicIAddressName,
     location: location,
-    publicIPAllocationMethod: 'Static', //Static or Dynamic => Static est obloigatoire pour la DDos protection, loadbalancer
+    publicIPAllocationMethod: network.IPAllocationMethod.Static, //Static or Dynamic => Static est obloigatoire pour la DDos protection, loadbalancer
     sku: {
-        name: "Standard",
-        tier: "Regional" //Regional or Glabal => Only Regional is compatible with DDOS protection
+        name: network.PublicIPAddressSkuName.Standard,
+        tier: network.PublicIPAddressSkuTier.Regional //Regional or Glabal => Only Regional is compatible with DDOS protection
     },
     ddosSettings: {
         ddosProtectionPlan: {
             id: ddosProtectionPlan.id
         },
         protectionMode: "Enabled",
+    },
+    zones: ["1", "2", "3"],
+    dnsSettings: {
+        domainNameLabel: dnsAppGwName,
     }
 })
+
+export const agwPublicFqdn =  appGwPublicIP.dnsSettings

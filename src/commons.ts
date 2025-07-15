@@ -18,7 +18,7 @@ export const resourceGroup = new resources.ResourceGroup(resourceGroupName, {
 })
 
 export const azureNativeConfig = new pulumi.Config('azure-native')
-export const subscriptionIdConfig = azureNativeConfig.require('subscriptionId')
+export const subscriptionId = azureNativeConfig.require('subscriptionId')
 export const tenantId = azureNativeConfig.require('tenantId')
 export const location = azureNativeConfig.require('location')
 
@@ -34,9 +34,9 @@ interface NetworkConfig {
 const network = new pulumi.Config('network')
 export const networkInfo = network.requireObject<NetworkConfig>('config')
 
-export const domainProxima = 'prod' == envDomain ? 'allodoctor.app.io' : `allodoctor.${env}.app.io`
+export const domainAlloDoctor = 'prod' == envDomain ? 'allodoctor.app.io' : `allodoctor.${env}.app.io`
 interface AppGwConfig {
-
+    zones: string[]
 }
 export interface AppGwTagsConfig {
     [key: string]: string

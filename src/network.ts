@@ -1,11 +1,11 @@
 import * as network from '@pulumi/azure-native/network'
 import { projectName, env, resourceGroup, location, networkInfo, tags } from './commons'
 
-const vnetName = `vnet-${projectName}-${env}`
+const vnetNameSpoke = `vnet-${projectName}-${env}`
 
-export const vnet = new network.VirtualNetwork(vnetName, {
+export const vnet = new network.VirtualNetwork(vnetNameSpoke, {
     resourceGroupName: resourceGroup.name,
-    virtualNetworkName: vnetName,
+    virtualNetworkName: vnetNameSpoke,
     location: location,
     addressSpace: {
         addressPrefixes: networkInfo.vnetAddress,
