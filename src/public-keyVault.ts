@@ -1,7 +1,7 @@
-import * as keyvault from "@pulumi/azure-native/keyvault"
 import * as random from "@pulumi/random"
+import * as keyvault from "@pulumi/azure-native/keyvault"
 
-import { projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId } from './commons'
+import {env, resourceGroup, tags, tenantId} from './commons'
 
 const randomSuffix = new random.RandomString(`kv-rdn-name`, {
     length: 3,

@@ -1,6 +1,6 @@
 import * as network from '@pulumi/azure-native/network'
 
-import { projectName, env, resourceGroup, location, tags } from './commons'
+import {projectName, env, resourceGroup, location, tags} from './commons'
 
 export const dnsAppGwName = env == "prod" ? `agw-${projectName}-allodoctor` : `agw-${projectName}-${env}-allodoctor`
 

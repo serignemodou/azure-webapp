@@ -2,8 +2,8 @@ import * as pulumi from "@pulumi/pulumi"
 import * as web from "@pulumi/azure-native/web"
 import * as monitor from "@pulumi/azure-native/monitor"
 
-import { env, resourceGroup, location, projectName} from "./commons"
-import { law } from "./logAnalytics"
+import {env, resourceGroup, location, projectName} from "./commons"
+import {law} from "./logAnalytics"
 
 interface SkuPlan {
     name: string

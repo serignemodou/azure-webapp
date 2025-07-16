@@ -1,5 +1,6 @@
 import * as network from '@pulumi/azure-native/network'
-import { projectName, env, resourceGroup, location, networkInfo, tags } from './commons'
+
+import {projectName, env, resourceGroup, location, networkInfo, tags} from './commons'
 
 const vnetNameSpoke = `vnet-${projectName}-${env}`
 
@@ -85,7 +86,7 @@ export const snetWebappOutbound = new network.Subnet(
         delegations: [
             {
                 name: 'VnetIntegration',
-                serviceName: 'Microsoft.Web/serverFrams'
+                serviceName: 'Microsoft.Web/serverFrams' //Required when use the subnet for web app vnet integration
             },
         ],
     },

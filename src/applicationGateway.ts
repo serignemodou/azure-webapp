@@ -1,13 +1,18 @@
-import * as network from '@pulumi/azure-native/network'
-import * as uai from '@pulumi/azure-native/managedidentity'
-import * as keyvault from "@pulumi/azure-native/keyvault"
-
-import { projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId, appGwConfig, domainAlloDoctor, subscriptionId } from './commons';
-import { appGwPublicIP } from './ddosPlan'
-import { law } from './logAnalytics'
 import * as pulumi from '@pulumi/pulumi';
+import * as network from '@pulumi/azure-native/network'
+import * as keyvault from "@pulumi/azure-native/keyvault"
+import * as monitor from "@pulumi/azure-native/monitor"
+
+
+import {projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId, appGwConfig, domainAlloDoctor, subscriptionId} from './commons';
+import {appGwPublicIP} from './ddosPlan'
+import {law} from './logAnalytics'
 import {snetAgw, nsgAgw} from "./network"
 import {kv} from "./public-keyVault"
+import {alloDoctorWebappFqdn} from "./webapp"
+import {wafPolicy} from "./wafPolicy"
+import {getFrontendIPConfigId} from "./helper"
+import {uaiAppGw} from "./managedIdentity";
 
 interface AppGwAutoscaleConfig {
     minCapacity: number,
@@ -63,14 +68,6 @@ new network.SecurityRule('Allow-Internet', {
     sourcePortRange: '*'
 })
 
-//UserManagedIdentity to retrieve ssl certificate from public key vault
-const uaiAppGwName = `uai-appgw-wafv2-${projectName}-${env}`
-const uaiAppGw = new uai.UserAssignedIdentity(uaiAppGwName, {
-    resourceGroupName: resourceGroup.name,
-    location: location,
-    resourceName: uaiAppGwName
-})
-
 //Grant access AppGw uia to public key vault to read certificate for SSL PathThrough
 //IMPORTANT: This key vault must be deployed before app gateway, because it store SSL Certificate used by app gateway, you can use new github repo to deploy this keyVault resource
 new keyvault.AccessPolicy('appgw-access-policy', {
@@ -85,16 +82,6 @@ new keyvault.AccessPolicy('appgw-access-policy', {
         }
     }
 })
-
-function getFrontendIPConfigId(
-    subscriptionId: string,
-    resourceGroupName: string,
-    reourceName: string,
-    resourceType: string,
-    frontendIPName: string,
-): string {
-    return `/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.Network/${resourceType}/${reourceName}/frontendIPConfigurations/${frontendIPName}`
-}
 
 const appGwName = `appgw-wafV2-${projectName}-${env}`
 const appgwConfig = {
@@ -199,6 +186,78 @@ const agw = new network.ApplicationGateway(
                 },
                 protocol: network.ApplicationGatewayProtocol.Https
             }
-        ]
+        ],
+        backendAddressPools: [
+            {
+                name: appgwConfig.backendAddressPoolsName.azure,
+                backendAddresses: [
+                    {
+                        fqdn: alloDoctorWebappFqdn,
+                    }
+                ],
+            }
+        ],
+        probes: [
+            {
+                name: appgwConfig.probesName.azure,
+                path: healthCheckpath,
+                host: alloDoctorWebappFqdn,
+                interval: 30,
+                timeout: 30,
+                unhealthyThreshold: 3,
+                protocol: network.ApplicationGatewayProtocol.Https
+            },
+        ],
+        requestRoutingRules: [
+            {
+                name: appgwConfig.requestRoutingRulesName.allodoctor,
+                priority: 10,
+                httpListener: {
+                    id: getFrontendIPConfigId(subscriptionId, `${resourceGroup.name}`, appgwConfig.name, 'applicationGateways',appgwConfig.httpListenersName.publicAlloDoctorio)
+                },
+                ruleType: network.ApplicationGatewayRequestRoutingRuleType.Basic, //basic because we proxify all traffix, is like /*
+                urlPathMap: {
+                    id: getFrontendIPConfigId(subscriptionId, `${resourceGroup.name}`, appgwConfig.name, 'applicationGateways',appgwConfig.urlPathMapName.allodoctor)
+                },
+                backendHttpSettings: {
+                    id: getFrontendIPConfigId(subscriptionId, `${resourceGroup.name}`, appgwConfig.name, 'applicationGateways',appgwConfig.backendHttpSettingsCollectionName.azure)
+                },
+                backendAddressPool: {
+                    id: getFrontendIPConfigId(subscriptionId, `${resourceGroup.name}`, appgwConfig.name, 'applicationGateways',appgwConfig.backendAddressPoolsName.azure)
+                }
+            }
+        ],
+        backendHttpSettingsCollection: [
+            {
+                name: appgwConfig.backendHttpSettingsCollectionName.azure,
+                cookieBasedAffinity: network.ApplicationGatewayCookieBasedAffinity.Disabled,
+                port: 443,
+                protocol: network.ApplicationGatewayProtocol.Https,
+                requestTimeout: 60,
+                probe: {
+                    id: getFrontendIPConfigId(subscriptionId, `${resourceGroup.name}`, appgwConfig.name, 'applicationGateways',appgwConfig.probesName.azure)
+                },
+                pickHostNameFromBackendAddress: true
+            }
+        ],
+        firewallPolicy: {
+            id: wafPolicy.id,
+        },
+        tags: tags,
+    },
+    {
+        dependsOn: [nsgSecuRuleGatewayManager, nsgSecuRuleAzureLoadBalancer]
     }
 )
+new monitor.DiagnosticSetting(`diagnostics-settings-${appgwConfig.name}`, {
+    resourceUri: agw.id,
+    workspaceId: law.id,
+    logs: [{
+        enabled: true,
+        categoryGroup: 'AllLogs'
+    }],
+    metrics: [{
+        enabled: true,
+        category: 'AllMetrics'
+    }]
+})

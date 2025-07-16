@@ -1,13 +1,18 @@
 import * as network from "@pulumi/azure-native/network";
 
-import { projectName, env, resourceGroup, location, tags } from './commons'
+import {projectName, env, resourceGroup, location, tags} from './commons'
 
 const wafPolicyName = `waf-policy-${projectName}-${env}`
 
-const wafPolicy = new network.WebApplicationFirewallPolicy(wafPolicyName, {
+export const wafPolicy = new network.WebApplicationFirewallPolicy(wafPolicyName, {
     resourceGroupName: resourceGroup.name,
     location: location,
     policyName: wafPolicyName,
+    policySettings: {
+        mode: network.WebApplicationFirewallMode.Prevention,
+        state: network.WebApplicationFirewallEnabledState.Enabled,
+        requestBodyCheck: true
+    },
     managedRules: {
         managedRuleSets: [
             {
@@ -107,5 +112,6 @@ const wafPolicy = new network.WebApplicationFirewallPolicy(wafPolicyName, {
                 ]
             }
         ]
-    }
+    },
+    tags: tags,
 })

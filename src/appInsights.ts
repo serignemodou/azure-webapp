@@ -1,7 +1,9 @@
-import * as insights from "@pulumi/azure-native/applicationinsights"
-import { env, projectName, resourceGroup, location } from './commons';
-import { law } from "./logAnalytics" 
 import * as monitor from "@pulumi/azure-native/monitor"
+import * as insights from "@pulumi/azure-native/applicationinsights"
+
+
+import {env, projectName, resourceGroup, location} from './commons';
+import {law} from "./logAnalytics" 
 
 const appInsightName = `appi-${projectName}-${env}`
 export const appInsight = new insights.Component(appInsightName, {

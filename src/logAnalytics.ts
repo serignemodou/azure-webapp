@@ -1,5 +1,6 @@
 import * as operationalinsights from "@pulumi/azure-native/operationalinsights";
-import { env, projectName, resourceGroup, location, tags } from './commons';
+
+import {env, projectName, resourceGroup, location, tags} from './commons';
 
 export const law = new operationalinsights.Workspace("workspace", {
     location: location,
