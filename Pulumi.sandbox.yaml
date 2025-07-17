@@ -7,9 +7,9 @@ config:
     port: 80
 
   app:autoscaling:
-    minimumWorkerInWorkingHours: '1'
-    maximumWorkerInWorkingHours: '3'
-    maximumWorkerInNonWorkingHours: '3'
+    minimumWorkerInDayWorkWorkingHours: '1'
+    maximumWorkerInDayWorkWorkingHours: '3'
+    maximumWorkerInDayWorkNonWorkingHours: '3'
 
   app:manualKeyVaultSecrets:
     postgres-password: passwordDB #Add manually these secret on key vault with name passwordDB, and postgres-password key in web app env
