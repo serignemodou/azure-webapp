@@ -117,7 +117,7 @@ export const snetPostgres = new network.Subnet(
         delegations: [
             {
                 name: 'Microsoft-DBforPostgreSQL-flexibleServers',
-                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServer'
+                serviceName: 'Microsoft.DBforPostgreSQL/flexibleServers' //Required when use the subnet for PostgreSQL vnet integration
             },
         ],
         serviceEndpoints: [

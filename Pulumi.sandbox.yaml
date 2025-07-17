@@ -1,10 +1,14 @@
 config:
+
+  app:config: #application config
+    port: 80
+
+
   az:servicePrincipalName: sp-az-it-sandbox #service pricipal with contributor role on subscription used by pulumi to deploy resources
   azure-native:location: FranceCentral
   azure-native:subscriptionId: "adb13171-70f4-4398-a85b-765112b87ab4"
   azure-native:tenantId: "azure-tenant-id"
-  app:config:
-    port: 80
+
 
   app:autoscaling:
     minimumWorkerInDayWorkWorkingHours: '1'
@@ -25,7 +29,12 @@ config:
     maxCapacity: 10
 
   network:config:
-    vnet: '172.24.144.0/24'
+    vnetAddress: '172.24.144.0/24'
+    snetAppGw: '172.24.144.0/28'
+    snetData: '172.24.144.80/28'
+    snetPostgres: '172.24.144.64/28'
+    snetWebAppInbount: '172.24.144.16/28'
+    snetWebAppOutbound: '172.24.144.32/27'
     
 
   appgw:config:
@@ -36,6 +45,11 @@ config:
     dbName: 'alloDoctorBdName'
     highAvailability: false 
     skuName: 'B_Standard_B2s' #PROD/BUILD 'GP_Standard_D2ds_v4'
+    skuTier: 'Burstable' #GeneralPurpose for prod and build
     storageMb: 32768
     backupRetentionDays: 7 #7 min, 35 max
 
+
+  platform:config:
+    dnsZoneName: beopen.sdx.io
+    postgresDnsZoneName: beopen.sdx.postgres.database.azure.com

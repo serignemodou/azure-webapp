@@ -1,17 +1,17 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as network from '@pulumi/azure-native/network'
-import * as keyvault from "@pulumi/azure-native/keyvault"
-import * as monitor from "@pulumi/azure-native/monitor"
+import * as network from '@pulumi/azure-native/network';
+import * as keyvault from "@pulumi/azure-native/keyvault";
+import * as monitor from "@pulumi/azure-native/monitor";
 
 
 import {projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId, appGwConfig, domainAlloDoctor, subscriptionId} from './commons';
-import {appGwPublicIP} from './ddosPlan'
-import {law} from './logAnalytics'
-import {snetAgw, nsgAgw} from "./network"
-import {kv} from "./public-keyVault"
-import {alloDoctorWebappFqdn} from "./webapp"
-import {wafPolicy} from "./wafPolicy"
-import {getFrontendIPConfigId} from "./helper"
+import {appGwPublicIP} from './ddosPlan';
+import {law} from './logAnalytics';
+import {snetAgw, nsgAgw} from "./network";
+import {kv} from "./public-keyVault";
+import {alloDoctorWebappFqdn} from "./webapp";
+import {wafPolicy} from "./wafPolicy";
+import {getFrontendIPConfigId} from "./helper";
 import {uaiAppGw} from "./managedIdentity";
 
 interface AppGwAutoscaleConfig {
