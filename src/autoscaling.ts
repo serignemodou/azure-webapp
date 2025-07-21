@@ -12,7 +12,6 @@ interface AutoscaleConfig {
     minimumWorkerInDayWorkWorkingHours: string
     maximumWorkerInDayWorkWorkingHours: string
     maximumWorkerInDayWorkNonWorkingHours: string
-
 }
 
 export const autoscalingConfig = new pulumi.Config('app').requireObject<AutoscaleConfig>('autoscaling')

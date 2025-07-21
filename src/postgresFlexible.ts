@@ -6,7 +6,7 @@ import * as postgresql from "@pulumi/azure-native/DBforPostgreSQL";
 
 
 import {env, tags, resourceGroup, projectName} from './commons';
-import {snetPostgres} from "./network";
+import {snetPostgres, nsgPostgres} from "./network";
 import {law} from './logAnalytics';
 
 
@@ -116,6 +116,7 @@ new postgresql.Database('flexibleServerDatabase', {
     charset: 'utf8',
     resourceGroupName: resourceGroup.name,
 })
+
 new monitor.DiagnosticSetting(`diagnostics-settings-${pgName}`, {
     resourceUri: flexibleServer.id,
     workspaceId: law.id,

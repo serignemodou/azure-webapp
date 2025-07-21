@@ -5,7 +5,7 @@ import * as network from "@pulumi/azure-native/network"
 
 import {env, resourceGroup, location, tags, tenantId} from './commons'
 import {law} from "./logAnalytics";
-import {snetData} from "./network"
+import {snetData, nsgData} from "./network"
 
 const randomSuffix = new random.RandomString(`kv-rdn-name`, {
     length: 3,

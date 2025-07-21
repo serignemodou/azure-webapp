@@ -3,3 +3,48 @@ config:
   azure-native:location: FranceCentral
   azure-native:subscriptionId: "build-subscription-id"
   azure-native:tenantId: "azure-tenant-id"
+
+
+  app:autoscaling:
+    minimumWorkerInDayWorkWorkingHours: '1'
+    maximumWorkerInDayWorkWorkingHours: '3'
+    maximumWorkerInDayWorkNonWorkingHours: '3'
+
+  app:manualKeyVaultSecrets:
+    postgres-password: passwordDB #Add manually these secret on key vault with name passwordDB, and postgres-password key in web app env
+
+  app:skuPlan:
+    name: 'P1v3' #2cpu + 8Go RAM
+    tier: 'PremiumV3'
+    capacity: 3 #less 3 when zoneRedundant is true
+    zoneRedundant: true
+
+  appgw:autoscaling:
+    minCapacity: 1
+    maxCapacity: 10
+
+  network:config:
+    vnetAddress: '172.24.144.0/24'
+    snetAppGw: '172.24.144.0/28'
+    snetData: '172.24.144.80/28'
+    snetPostgres: '172.24.144.64/28'
+    snetWebAppInbount: '172.24.144.16/28'
+    snetWebAppOutbound: '172.24.144.32/27'
+    
+
+  appgw:config:
+    zones: ['1', '2', '3']
+
+  postgresqlflexible:config:
+    adminUsername: 'AdminUser'
+    dbName: 'alloDoctorBdName'
+    highAvailability: false 
+    skuName: 'GP_Standard_D2ds_v4' #PROD/BUILD 'GP_Standard_D2ds_v4'
+    skuTier: 'GeneralPurpose' #GeneralPurpose for prod and build
+    storageMb: 32768
+    backupRetentionDays: 7 #7 min, 35 max
+
+
+  platform:config:
+    dnsZoneName: beopen.sdx.io
+    postgresDnsZoneName: beopen.build.postgres.database.azure.com

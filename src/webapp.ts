@@ -10,7 +10,7 @@ import {appServicePlan} from "./app-plan"
 import {law} from "./logAnalytics";
 import {webAppSettings} from "./webapp-config";
 import {input} from "@pulumi/azure-native/types";
-import {snetWebappInbound, snetWebappOutbound} from "./network"
+import {snetWebappInbound, snetWebappOutbound, nsgWebappOutbound, nsgWebappInbound} from "./network"
 import {uaiWebApp} from "./managedIdentity"
 import {kv} from "./public-keyVault";
 

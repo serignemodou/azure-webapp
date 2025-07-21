@@ -41,10 +41,10 @@ export const snetAgw = new network.Subnet(snetAgwName, {
 const snetWebappInboundName = `snet-${projectName}-webapp-inbound-${env}`
 const nsgWebappInBoundName = `nsg-${snetWebappInboundName}`
 
-const nsgWebappInbound = new network.NetworkSecurityGroup(nsgWebappInBoundName, {
+export const nsgWebappInbound = new network.NetworkSecurityGroup(nsgWebappInBoundName, {
     networkSecurityGroupName: `${nsgWebappInBoundName}`,
     resourceGroupName: resourceGroup.name,
-    tags: tags
+    tags: tags,
 })
 
 export const snetWebappInbound = new network.Subnet(
@@ -66,7 +66,7 @@ export const snetWebappInbound = new network.Subnet(
 const snetWebappOutboundName = `snet-${projectName}-webapp-outbound-${env}`
 const nsgWebappOutBoundName = `nsg-${snetWebappOutboundName}`
 
-const nsgWebappOutbound = new network.NetworkSecurityGroup(nsgWebappOutBoundName, {
+export const nsgWebappOutbound = new network.NetworkSecurityGroup(nsgWebappOutBoundName, {
     networkSecurityGroupName: `${nsgWebappOutBoundName}`,
     resourceGroupName: resourceGroup.name,
     tags: tags
@@ -97,7 +97,7 @@ export const snetWebappOutbound = new network.Subnet(
 const snetPostgresName = `snet-${projectName}-postgres-${env}`
 const nsgPostgresName = `nsg-${snetWebappOutboundName}`
 
-const nsgPostgres = new network.NetworkSecurityGroup(nsgPostgresName, {
+export const nsgPostgres = new network.NetworkSecurityGroup(nsgPostgresName, {
     networkSecurityGroupName: `${nsgPostgresName}`,
     resourceGroupName: resourceGroup.name,
     tags: tags
@@ -133,7 +133,7 @@ export const snetPostgres = new network.Subnet(
 const snetDataName = `snet-${projectName}-${env}`
 const nsgDataName = `nsg-${snetDataName}`
 
-const nsgData = new network.NetworkSecurityGroup(nsgDataName, {
+export const nsgData = new network.NetworkSecurityGroup(nsgDataName, {
     networkSecurityGroupName: `${nsgDataName}`,
     resourceGroupName: resourceGroup.name,
     tags: tags
