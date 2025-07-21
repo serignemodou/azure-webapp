@@ -16,7 +16,7 @@ export const appInsight = new insights.Component(appInsightName, {
     ingestionMode: insights.IngestionMode.LogAnalytics,
     requestSource: insights.RequestSource.Rest
 })
-
+/*
 new monitor.DiagnosticSetting(`diagnostics-settings-${appInsightName}`, {
     resourceUri: appInsight.id,
     workspaceId: law.id,
@@ -29,3 +29,4 @@ new monitor.DiagnosticSetting(`diagnostics-settings-${appInsightName}`, {
         category: 'AllMetrics'
     }]
 })
+*/

@@ -94,6 +94,10 @@ const pgConfig = {
     log_statement: 'ddl',
     log_temp_files: '0',
     log_autovacum_duration: '0',
+    lock_timeout: '600000',
+    idle_in_transaction_session_timeout: '3000',
+    'pgms_wait_sampling.query_capture_mode': 'All',
+    'pgbouncer.enabled': 'true', 
     'azure.extensions': 'PG_STAT_STATEMENTS,PG_BUFFERCACHE,HYPOPG,PGAUDIT,PGSTATTUPLE,PG_TRGM,UNACCENT,PGCRYPTO'
 }
 
