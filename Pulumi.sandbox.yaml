@@ -16,7 +16,9 @@ config:
     maximumWorkerInDayWorkNonWorkingHours: '3'
 
   app:manualKeyVaultSecrets:
-    postgres-password: passwordDB #Add manually these secret on key vault with name passwordDB, and postgres-password key in web app env
+    postgres-password: 
+      secure: AAABALIEQ5QnQieOw4oAAhknMDQpXscdU/VyauRHlTKcGsNRzpKt9sby
+    
 
   app:skuPlan:
     name: 'P1v3' #2cpu + 8Go RAM
@@ -48,8 +50,6 @@ config:
     zones: ['1', '2', '3']
     minCapacity: 1
     mawCapacity: 3
-
-  
 
   appgw:config:
     zones: ['1', '2', '3']
