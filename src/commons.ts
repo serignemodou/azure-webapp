@@ -22,7 +22,7 @@ export const subscriptionId = azureNativeConfig.require('subscriptionId')
 export const tenantId = azureNativeConfig.require('tenantId')
 export const location = azureNativeConfig.require('location')
 
-interface NetworkConfig {
+interface spokeNetworkConfig {
     snetAppGw: string
     snetWebappInbound: string
     snetWebappOutbound: string
@@ -31,8 +31,17 @@ interface NetworkConfig {
     vnetAddress: [string]
 }
 
-const network = new pulumi.Config('network')
-export const networkInfo = network.requireObject<NetworkConfig>('config')
+interface hubNetworkConfig {
+    vnetAddress: [string]
+    snetFirewall: string
+    snetVPNGateway: string
+}
+
+const spokeNetwork = new pulumi.Config('spokeNetwork')
+export const spokeNetworkInfo = spokeNetwork.requireObject<spokeNetworkConfig>('config')
+
+const hubNetwork = new pulumi.Config('hubNetwork')
+export const hubNetworkInfo = hubNetwork.requireObject<hubNetworkConfig>('config')
 
 export const domainAlloDoctor = 'prod' == envDomain ? 'allodoctor.app.io' : `allodoctor.${env}.app.io`
 interface AppGwConfig {

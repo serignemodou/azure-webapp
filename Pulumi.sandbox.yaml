@@ -28,14 +28,28 @@ config:
     minCapacity: 1
     maxCapacity: 10
 
-  network:config:
-    vnetAddress: '172.24.144.0/24'
-    snetAppGw: '172.24.144.0/28'
-    snetData: '172.24.144.80/28'
-    snetPostgres: '172.24.144.64/28'
-    snetWebAppInbount: '172.24.144.16/28'
-    snetWebAppOutbound: '172.24.144.32/27'
+  spokeNetwork:config:
+    vnetAddress: '172.24.144.0/24' # [172.24.144.0 - 172.24.144.255]
+    snetAppGw: '172.24.144.0/28' # [172.24.144.0 - 172.24.144.15] ; IPs = 15 (10 pour AppGW, 5 pour Azure)
+    snetWebAppInbount: '172.24.144.16/28' # [172.24.144.16 - 172.24.144.31] ; IPs = 15 (10 pour WebApp Inbound, 5 pour Azure)
+    snetWebAppOutbound: '172.24.144.32/27' # [172.24.144.32 - 172.24.144.63] ; IPs = 31 (26 pour WebApp Inbound, 5 pour Azure)
+    snetPostgres: '172.24.144.64/28' # [172.24.144.64 - 172.24.144.79] ; IPs = 15 (10 pour Postgres, 5 pour Azure)
+    snetData: '172.24.144.80/28' # [172.24.144.80 - 172.24.144.95] ; IPs = 15 (10 pour KV, Blob, 5 pour Azure)
+
+
+  hubNetwork:config:
+    vnetAddress: '172.24.0.0/24' #Nbr IPs 256 ((2 puissance 32-24) - 1)
+    snetFirewall: '172.24.0.0/27' # Nbr IPs=((2 puissance n) -1), avec n=32-27=5 ; (2 puissance 5) -1 = 31 ; IPs dans /27 = [172.24.0.1 à 172.24.0.31]
+    snetVPNGateway: '172.24.0.32/27' # IPs dans le CIDR [172.24.0.32 à 172.24.0.63]
     
+
+  firewall:config:
+    skuTier: 'Standard'
+    zones: ['1', '2', '3']
+    minCapacity: 1
+    mawCapacity: 3
+
+  
 
   appgw:config:
     zones: ['1', '2', '3']

@@ -51,7 +51,7 @@ const rules: pulumi.Input<input.monitor.ScaleRuleArgs>[] = [
             metricResourceUri: appServicePlan.id,
             operator: 'GreaterThan',
             statistic: 'Average',
-            threshold: 80,
+            threshold: 75,
             timeAggregation: 'Average',
             timeGrain: 'PT1M', //Evaluation toute les 1mn
             timeWindow: 'PT5M', //scal up si l'usage cpu dépasse 80% sur 5mns

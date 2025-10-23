@@ -7,7 +7,7 @@ import * as monitor from "@pulumi/azure-native/monitor";
 import {projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId, appGwConfig, domainAlloDoctor, subscriptionId} from './commons';
 import {appGwPublicIP} from './ddosPlan';
 import {law} from './logAnalytics';
-import {snetAgw, nsgAgw} from "./network";
+import {snetAgw, nsgAgw} from "./networkSpoke";
 import {kv} from "./public-keyVault";
 import {alloDoctorWebappFqdn} from "./webapp";
 import {wafPolicy} from "./wafPolicy";

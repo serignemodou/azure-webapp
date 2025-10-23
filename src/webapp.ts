@@ -5,12 +5,12 @@ import * as network from "@pulumi/azure-native/network"
 import * as authorization from "@pulumi/azure-native/authorization"
 
 
-import {env, resourceGroup, location, tags, projectName, healthCheckpath} from './commons';
+import { env, resourceGroup, location, tags, projectName, healthCheckpath } from './commons';
 import {appServicePlan} from "./app-plan"
 import {law} from "./logAnalytics";
 import {webAppSettings} from "./webapp-config";
 import {input} from "@pulumi/azure-native/types";
-import {snetWebappInbound, snetWebappOutbound, nsgWebappOutbound, nsgWebappInbound} from "./network"
+import {snetWebappInbound, snetWebappOutbound, nsgWebappOutbound, nsgWebappInbound} from "./networkSpoke"
 import {uaiWebApp} from "./managedIdentity"
 import {kv} from "./public-keyVault";
 

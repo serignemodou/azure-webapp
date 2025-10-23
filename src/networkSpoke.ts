@@ -1,18 +1,43 @@
 import * as network from '@pulumi/azure-native/network'
 
-import {projectName, env, resourceGroup, location, networkInfo, tags} from './commons'
+import { projectName, env, resourceGroup, location, spokeNetworkInfo, hubNetworkInfo, tags } from './commons';
+
+import {fwPrivateIP} from './firewall'
 
 const vnetNameSpoke = `vnet-${projectName}-${env}`
 
-export const vnet = new network.VirtualNetwork(vnetNameSpoke, {
+/* spoke virtual network */
+export const spokeVnet = new network.VirtualNetwork(vnetNameSpoke, {
     resourceGroupName: resourceGroup.name,
     virtualNetworkName: vnetNameSpoke,
+    enableDdosProtection: false,
     location: location,
     addressSpace: {
-        addressPrefixes: networkInfo.vnetAddress,
+        addressPrefixes: spokeNetworkInfo.vnetAddress,
     },
+    tags: tags
 })
 
+/* Route table and route to forward webapp outbound trafic throught firewall*/
+const routeTableName = `rt-spoke-to-hub-${projectName}-${env}`
+const routeTable = new network.RouteTable(routeTableName, {
+    resourceGroupName: resourceGroup.name,
+    location: resourceGroup.location,
+    routeTableName: routeTableName,
+    tags: tags,
+})
+
+const routeName = `rt-webapp-outbound-through-fw`
+new network.Route('routeName', {
+    resourceGroupName: resourceGroup.name,
+    routeTableName: routeTable.name,
+    routeName: routeName,
+    addressPrefix: '0.0.0.0/0',
+    nextHopType: network.RouteNextHopType.VirtualAppliance,
+    nextHopIpAddress: fwPrivateIP
+})
+
+/* subnets and nsg on spoke virtual network */
 //Sous AppGataway
 const snetAgwName = `snet-${projectName}-${env}-public-app-gateway-v2`
 const nsgAgwName = `nsg-${snetAgwName}`
@@ -22,6 +47,28 @@ export const nsgAgw = new network.NetworkSecurityGroup(
     {
         networkSecurityGroupName: `${nsgAgwName}`,
         resourceGroupName : resourceGroup.name,
+        securityRules: [
+            {
+                direction: 'Inbound',
+                access: 'Allow',
+                protocol: 'TCP',
+                destinationAddressPrefix: '*', 
+                destinationPortRange: '*',
+                sourceAddressPrefix: 'Internet', // Service Tag Internet
+                priority: 100,
+                name: 'Allow-Internet'
+            },
+            {
+                direction: 'Inbound',
+                access: 'Allow',
+                protocol: '*',
+                destinationAddressPrefix: '*', 
+                destinationPortRange: '*',
+                sourceAddressPrefix: 'GatewayManager', // Service Tag Internet
+                priority: 300,
+                name: 'Allow-Internet'
+            }
+        ],
         tags: tags
     }
 )
@@ -29,8 +76,8 @@ export const nsgAgw = new network.NetworkSecurityGroup(
 export const snetAgw = new network.Subnet(snetAgwName, {
     subnetName: snetAgwName,
     resourceGroupName: resourceGroup.name,
-    virtualNetworkName: vnet.name,
-    addressPrefix: networkInfo.snetAppGw,
+    virtualNetworkName: spokeVnet.name,
+    addressPrefix: spokeNetworkInfo.snetAppGw,
     privateEndpointNetworkPolicies: 'Enable',
     networkSecurityGroup: {
         id: nsgAgw.id,
@@ -52,8 +99,8 @@ export const snetWebappInbound = new network.Subnet(
     {
         subnetName: snetWebappInboundName,
         resourceGroupName: resourceGroup.name,
-        virtualNetworkName: vnet.name,
-        addressPrefix: networkInfo.snetWebappInbound,
+        virtualNetworkName: spokeVnet.name,
+        addressPrefix: spokeNetworkInfo.snetWebappInbound,
         privateEndpointNetworkPolicies: 'Enable',
         networkSecurityGroup: {
             id: nsgWebappInbound.id,
@@ -77,8 +124,8 @@ export const snetWebappOutbound = new network.Subnet(
     {
         subnetName: snetWebappOutboundName,
         resourceGroupName: resourceGroup.name,
-        virtualNetworkName: vnet.name,
-        addressPrefix: networkInfo.snetWebappOutbound,
+        virtualNetworkName: spokeVnet.name,
+        addressPrefix: spokeNetworkInfo.snetWebappOutbound,
         privateEndpointNetworkPolicies: 'Enable',
         networkSecurityGroup: {
             id: nsgWebappOutbound.id,
@@ -89,6 +136,9 @@ export const snetWebappOutbound = new network.Subnet(
                 serviceName: 'Microsoft.Web/serverFrams' //Required when use the subnet for web app vnet integration
             },
         ],
+        routeTable: {
+            id: routeTable.id
+        }
     },
     { dependsOn: [snetWebappInbound]}
 )
@@ -108,8 +158,8 @@ export const snetPostgres = new network.Subnet(
     {
         subnetName: snetPostgresName,
         resourceGroupName: resourceGroup.name,
-        virtualNetworkName: vnet.name,
-        addressPrefix: networkInfo.snetPostgres,
+        virtualNetworkName: spokeVnet.name,
+        addressPrefix: spokeNetworkInfo.snetPostgres,
         privateEndpointNetworkPolicies: 'Enable',
         networkSecurityGroup: {
             id: nsgPostgres.id,
@@ -130,7 +180,7 @@ export const snetPostgres = new network.Subnet(
 )
 
 //SNET Data
-const snetDataName = `snet-${projectName}-${env}`
+const snetDataName = `snet-${projectName}-data-${env}`
 const nsgDataName = `nsg-${snetDataName}`
 
 export const nsgData = new network.NetworkSecurityGroup(nsgDataName, {
@@ -144,8 +194,8 @@ export const snetData = new network.Subnet(
     {
         subnetName: snetDataName,
         resourceGroupName: resourceGroup.name,
-        virtualNetworkName: vnet.name,
-        addressPrefix: networkInfo.snetData,
+        virtualNetworkName: spokeVnet.name,
+        addressPrefix: spokeNetworkInfo.snetData,
         privateEndpointNetworkPolicies: 'Enable',
         networkSecurityGroup: {
             id: nsgData.id,
@@ -153,3 +203,4 @@ export const snetData = new network.Subnet(
     },
     { dependsOn: [snetPostgres]}
 )
+
