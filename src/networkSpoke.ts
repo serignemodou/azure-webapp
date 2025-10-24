@@ -4,6 +4,7 @@ import { projectName, env, resourceGroup, location, spokeNetworkInfo, tags } fro
 
 import {fwPrivateIP} from './firewall'
 import * as pulumi from '@pulumi/pulumi';
+import {ddosProtectionPlan} from './ddosPlan'
 
 const vnetNameSpoke = `vnet-${projectName}-${env}`
 
@@ -12,10 +13,14 @@ interface platformConfig {
 }
 
 /* spoke virtual network */
+const enableDdosProtection = env == 'prod' ? true : false
 export const spokeVnet = new network.VirtualNetwork(vnetNameSpoke, {
     resourceGroupName: resourceGroup.name,
     virtualNetworkName: vnetNameSpoke,
-    enableDdosProtection: false,
+    enableDdosProtection: enableDdosProtection,
+    ddosProtectionPlan: {
+        id: ddosProtectionPlan.id, // only apply if enableDdosProtection is true
+    },
     location: location,
     addressSpace: {
         addressPrefixes: spokeNetworkInfo.vnetAddress,

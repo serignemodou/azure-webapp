@@ -11,7 +11,8 @@ config:
     maximumWorkerInDayWorkNonWorkingHours: '3'
 
   app:manualKeyVaultSecrets:
-    ssl-key-store: allodoctor-cert # Ce certificat au format pfx sera ajouter manuellement sur le keyvault en tant que objet certificat
+    ssl-key-store: allodoctor-cert # Certificat pour mTLS entre mon app dans la webApp et un serveur d'authentification PF Ce certificat au format pfx sera ajouter manuellement sur le keyvault en tant que objet certificat
+    app-gw-public-cert: appgw-public-cert # Pfx certificat
 
   keyvaultSecrets:store:
     allodoctor-admin-key: 

@@ -5,10 +5,10 @@ import * as monitor from "@pulumi/azure-native/monitor";
 
 
 import {projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwTagsConfig, tenantId, appGwConfig, domainAlloDoctor, subscriptionId} from './commons';
-import {appGwPublicIP} from './ddosPlan';
+import {ddosProtectionPlan} from './ddosPlan';
 import {law} from './logAnalytics';
 import {snetAgw, nsgAgw} from "./networkSpoke";
-import {kv} from "./public-keyVault";
+import {kVault} from "./keyVault";
 import {alloDoctorWebappFqdn} from "./webapp";
 import {wafPolicy} from "./wafPolicy";
 import {getFrontendIPConfigId} from "./helper";
@@ -18,6 +18,29 @@ interface AppGwAutoscaleConfig {
     minCapacity: number,
     maxCapacity: number
 }
+export const dnsAppGwName = env == "prod" ? `agw-${projectName}-allodoctor` : `agw-${projectName}-${env}-allodoctor`
+const publicIAddressName = `pip-agw-${projectName}-${env}`
+const appGwPublicIP = new network.PublicIPAddress(publicIAddressName, {
+    resourceGroupName: resourceGroup.name,
+    publicIpAddressName: publicIAddressName,
+    location: location,
+    publicIPAllocationMethod: network.IPAllocationMethod.Static, //Static or Dynamic => Static est obloigatoire pour la DDos protection, loadbalancer
+    sku: {
+        name: network.PublicIPAddressSkuName.Standard,
+        tier: network.PublicIPAddressSkuTier.Regional //Regional or Glabal => Only Regional is compatible with DDOS protection
+    },
+    ddosSettings: {
+        ddosProtectionPlan: {
+            id: ddosProtectionPlan.id
+        },
+        protectionMode: "Enabled",
+    },
+    zones: ["1", "2", "3"],
+    dnsSettings: {
+        domainNameLabel: dnsAppGwName,
+    }
+})
+
 
 export const appGWAutoscaleConfig = new pulumi.Config('appgw').requireObject<AppGwAutoscaleConfig>('autoscaling')
 export const appgwTags = new pulumi.Config('appgw').getObject<AppGwTagsConfig>('tags')
@@ -112,7 +135,7 @@ const appgwConfig = {
         allodoctor: 'path-apps-allodoctor'
     },
     sslCertificatesName: {
-        publicCertAlloDoctor: 'public-cert-allodoctor-from-asc' //SSL certificate for SSL PathThrough
+        publicCertAlloDoctor: 'appgw-public-cert' //SSL certificate for SSL PathThrough in keyVault
     },
     identityId: {
         uiaAppGw: uaiAppGw.id
@@ -164,7 +187,7 @@ const agw = new network.ApplicationGateway(
         sslCertificates: [
             {
                 name: appgwConfig.sslCertificatesName.publicCertAlloDoctor,
-                keyVaultSecretId: kv.id
+                keyVaultSecretId: kVault.id,
             }
         ],
         sslPolicy: {

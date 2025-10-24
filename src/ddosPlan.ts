@@ -6,7 +6,7 @@ export const dnsAppGwName = env == "prod" ? `agw-${projectName}-allodoctor` : `a
 
 // DDOS Protection IP-Level
 const ddosProtectionPlanName = `ddos-plan-name-${env}`
-const ddosProtectionPlan = new network.DdosProtectionPlan(ddosProtectionPlanName, {
+export const ddosProtectionPlan = new network.DdosProtectionPlan(ddosProtectionPlanName, {
     resourceGroupName: resourceGroup.name,
     location: location,
     ddosProtectionPlanName: ddosProtectionPlanName,
