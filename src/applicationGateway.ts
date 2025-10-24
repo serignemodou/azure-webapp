@@ -8,7 +8,7 @@ import {projectName, env, resourceGroup, location, tags, healthCheckpath, AppGwT
 import {ddosProtectionPlan} from './ddosPlan';
 import {law} from './logAnalytics';
 import {snetAgw, nsgAgw} from "./networkSpoke";
-import {kVault} from "./keyVault";
+import {kv} from "./publicKeyVault";
 import {alloDoctorWebappFqdn} from "./webapp";
 import {wafPolicy} from "./wafPolicy";
 import {getFrontendIPConfigId} from "./helper";
@@ -135,7 +135,7 @@ const appgwConfig = {
         allodoctor: 'path-apps-allodoctor'
     },
     sslCertificatesName: {
-        publicCertAlloDoctor: 'appgw-public-cert' //SSL certificate for SSL PathThrough in keyVault
+        publicCertAlloDoctor: 'appgw-public-cert' //A ajouter (.PFX) manuellement dans le vault PublicKeyVault ; SSL certificate for SSL PathThrough
     },
     identityId: {
         uiaAppGw: uaiAppGw.id
