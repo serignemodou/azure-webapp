@@ -187,7 +187,7 @@ const agw = new network.ApplicationGateway(
         sslCertificates: [
             {
                 name: appgwConfig.sslCertificatesName.publicCertAlloDoctor,
-                keyVaultSecretId: kVault.id,
+                keyVaultSecretId: kv.id,
             }
         ],
         sslPolicy: {
