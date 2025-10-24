@@ -6,6 +6,7 @@ import * as network from "@pulumi/azure-native/network"
 import {env, resourceGroup, location, tags, tenantId} from './commons'
 import {law} from "./logAnalytics";
 import {snetData, nsgData} from "./networkSpoke"
+import * as pulumi from '@pulumi/pulumi';
 
 const randomSuffix = new random.RandomString(`kv-rdn-name`, {
     length: 3,
@@ -45,6 +46,30 @@ new network.PrivateEndpoint(`pe-kv-allodoctor`, {
         id: snetData.id
     },
     id: vault.id,
+})
+
+export const kVault = {
+    id: vault.id,
+    uri: pulumi.interpolate`https://${vault.name}.vault.azure.net/`,
+    name: vault.name,
+    resourceGroup: resourceGroup.name
+}
+
+/* Add secret encrypted in Pulumi.<env>.yaml keyvaultSecrets to the vault */
+interface Secrets {
+    [name: string]: pulumi.Input<string>
+}
+
+export const secretsConfig = new pulumi.Config('keyvaultSecrets').requireObject<Secrets>('store')
+export const secrets = Object.entries(secretsConfig).map(([name, value]) => {
+    return new keyvault.Secret(`secret-${name}`, {
+        vaultName: vault.name,
+        resourceGroupName: resourceGroup.name,
+        secretName: name,
+        properties: {
+            value,
+        }
+    })
 })
 
 new monitor.DiagnosticSetting(`diagnostics-settings-kv-allodoctor`, {

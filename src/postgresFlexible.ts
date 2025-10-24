@@ -6,7 +6,7 @@ import * as postgresql from "@pulumi/azure-native/DBforPostgreSQL";
 
 
 import {env, tags, resourceGroup, projectName} from './commons';
-import {snetPostgres, nsgPostgres} from "./network";
+import {snetPostgres} from "./networkSpoke";
 import {law} from './logAnalytics';
 
 

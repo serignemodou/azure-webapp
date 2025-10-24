@@ -11,8 +11,7 @@ import {law} from "./logAnalytics";
 import {webAppSettings} from "./webapp-config";
 import {input} from "@pulumi/azure-native/types";
 import {snetWebappInbound, snetWebappOutbound, nsgWebappOutbound, nsgWebappInbound} from "./networkSpoke"
-import {uaiWebApp} from "./managedIdentity"
-import {kv} from "./public-keyVault";
+import {vault} from "./keyVault";
 
 const siteConfig: pulumi.Input<input.web.SiteConfigArgs> = {
     appSettings: webAppSettings,
@@ -36,12 +35,9 @@ export const webApp = new web.WebApp(webAppName, {
     reserved: true,
     serverFarmId: appServicePlan.id,
     publicNetworkAccess: "Enabled",
-    keyVaultReferenceIdentity: "UserAssigned",
+    keyVaultReferenceIdentity: "SystemAssigned", //Identité utiliser pour s'authenfier au keyVault
     identity: {
-        type: web.ManagedServiceIdentityType.UserAssigned,
-        userAssignedIdentities: [
-            uaiWebApp.id,
-        ]
+        type: web.ManagedServiceIdentityType.SystemAssigned,
     },
     clientAffinityEnabled: false,
     siteConfig: {
@@ -68,15 +64,15 @@ new network.PrivateEndpoint(`pe-${webAppName}`, {
 
 //RBAC Role to read secret on KV
 const roleDefinition = new authorization.RoleDefinition(`rd-uai-to-kv${webAppName}`, {
-    scope: kv.id,
+    scope: vault.id,
     roleName: "Key Vault Secrets User"
 })
 
 new authorization.RoleAssignment(`ra-uai-to-kv-${webAppName}`, {
-    principalId: uaiWebApp.principalId,
+    principalId: webApp.identity.apply(managedIdentity => managedIdentity!.principalId!), 
     principalType: authorization.PrincipalType.ServicePrincipal,
-    scope: kv.id,
     roleDefinitionId: roleDefinition.id,
+    scope: vault.id,
 })
 
 //VNET integration for webapp outbound traffic
