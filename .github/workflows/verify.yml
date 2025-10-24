@@ -1,0 +1,12 @@
+name: Verify
+on:
+    push:
+
+jobs:
+    verify:
+        runs-on: [ubuntu]
+        name: verify
+        steps:
+            - id: verify
+              name: Verify for azure action
+              uses: azure-actions/verify@stable
