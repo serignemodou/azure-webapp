@@ -59,11 +59,11 @@ config:
     dbName: 'alloDoctorBdName'
     highAvailability: false 
     skuName: 'B_Standard_B2s' #PROD/BUILD 'GP_Standard_D2ds_v4'
-    skuTier: 'Burstable' #GeneralPurpose for prod and build
     storageMb: 32768
     backupRetentionDays: 7 #7 min, 35 max
+    
 
 
   platform:config:
-    dnsZoneName: beopen.sdx.io
-    postgresDnsZoneName: beopen.sdx.postgres.database.azure.com
+    dnsZoneName: beapp.sdx.io
+    postgresDnsZoneName: beapp.sdx.prv.postgres.database.azure.com

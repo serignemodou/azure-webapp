@@ -1,10 +1,15 @@
 import * as network from '@pulumi/azure-native/network'
-
-import { projectName, env, resourceGroup, location, spokeNetworkInfo, hubNetworkInfo, tags } from './commons';
+import * as privatedns from '@pulumi/azure-native/privatedns'
+import { projectName, env, resourceGroup, location, spokeNetworkInfo, tags } from './commons';
 
 import {fwPrivateIP} from './firewall'
+import * as pulumi from '@pulumi/pulumi';
 
 const vnetNameSpoke = `vnet-${projectName}-${env}`
+
+interface platformConfig {
+    postgresDnsZoneName: string
+}
 
 /* spoke virtual network */
 export const spokeVnet = new network.VirtualNetwork(vnetNameSpoke, {
@@ -204,3 +209,20 @@ export const snetData = new network.Subnet(
     { dependsOn: [snetPostgres]}
 )
 
+const platform = new pulumi.Config('platform').requireObject<platformConfig>('config')
+
+export const privateZoneDns = new privatedns.PrivateZone(platform.postgresDnsZoneName, {
+    resourceGroupName: resourceGroup.name,
+    privateZoneName: platform.postgresDnsZoneName,
+    tags: tags,
+})
+
+new privatedns.VirtualNetworkLink(`zone-dns-vnet-link`,{
+    resourceGroupName: resourceGroup.name,
+    virtualNetworkLinkName: `link-to-vnet-sdx`,
+    privateZoneName: privateZoneDns.name,
+    virtualNetwork: {
+        id: spokeVnet.id,
+    },
+    registrationEnabled: false,
+})
